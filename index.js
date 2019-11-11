@@ -135,24 +135,81 @@ const fi = (function() { //
     },
 
     sortBy: function (collection, callback) {
-      let newCollection = collection.slice()
-      return newCollection.sort(function(a, b){
-        return callback(a) - callback(b)
-      })
+
+      let newSort = collection.slice()
+      return newSort.sort(function (a, b) {
+        // ranked in ascending order by the results of running each value through callback.
+        // The values from the original
+        // array should be retained within the sorted copy, just in ascending order.
+          return callback(a) - callback(b)
+        })
     },
 
-    flatten: function (array, shallow) {
-      let newArr = []
+//     unpack: function(receiver, arr) {
+//   for (let val of arr)
+//     receiver.push(val)
+// },
 
-      function handleArr(){
-      for(let i = 0; i < array.length){
-        if (Array.isArray(array[i])){
+// fi.flatten([1, [2], [3, [[4]]]]);
+// => [1, 2, 3, 4];
+//
+// fi.flatten([1, [2], [3, [[4]]]], true);
+// => [1, 2, 3, [[4]]];
 
+  flatten: function(collection, shallow, newArr=[]) { // basically makings sure this arr exists and has a default initially
+
+    if (shallow) {
+        for (let currentValue of collection){ // iterate through current val in collection
+            if (Array.isArray(currentValue)){ // it it's array, go through and grb each item and push it
+                for (let newValue of currentValue) {
+                  newArr.push(newValue)
+                }
+            } else { // if not, just push current value.
+                newArr.push(currentValue)
+            }
+        }
+    } else {
+        for (let currentValue of collection) { // iterate through current value in collction
+            if (Array.isArray(currentValue)) {
+              fi.flatten(currentValue, false, newArr) // repeat process for this value - handle nestedness
+            } else {
+              newArr.push(currentValue)
+            }
+        }
+    }
+
+    return newArr
+
+    // refactored version
+    for (let currentValue of collection){
+        if (shallow && Array.isArray(currentValue)) {
+            for (let newValue of currentValue) {
+                newArr.push(newValue)
+            }
+        } else if (!shallow && Array.isArray(currentValue)) {
+            fi.flatten(currentValue, false, newArr)
         } else {
+            newArr.push(currentValue)
+        }
+    }
 
+    return newArr
+  },
+
+    uniq: function (collection, isSorted = false, callback = false) {
+      // collection = collection.sortBy(callback)
+      let newCollection = []
+      for (let i = 0; i < collection.length; i++) {
+        let currentValue = collection[i]
+        // let value = currentValue
+
+        if (!newCollection.includes(currentValue)){
+          newCollection.push(currentValue)
+        } else {
+          collection.splice(i, 1)
         }
       }
-    }
+      return collection
     },
 
     functions: function(array, callback) {
