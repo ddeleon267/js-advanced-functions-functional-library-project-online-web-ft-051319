@@ -5,37 +5,24 @@ const fi = (function() { //
     },
 
     each: function(collection, callback) {
-      let newCollection = []
-
-      if (Array.isArray(collection)) {
-        newCollection = collection.slice()
-      } else {
-        newCollection = Object.values(collection)
+      const newCollection = Array.isArray(collection) ? collection.slice() : Object.values(collection);
+      for (let i = 0; i < newCollection.length; i++) {
+        callback(newCollection[i], i, newCollection);
       }
-
-      for(let i = 0; i < newCollection.length; i++){
-        callback(newCollection[i])
-      }
-      return collection
+      return collection;
     },
 
     map: function (collection, callback) {
-      let values = []
-      let newCollection = []
-
-      if (Array.isArray(collection)) {
-        values = collection.slice()
-      } else {
-        values = Object.values(collection)
-      }
+      const values = Array.isArray(collection) ? collection.slice() : Object.values(collection);
+      const newCollection = []
 
       for(let i = 0; i < values.length; i++){
-        newCollection.push(callback(values[i]))
+        newCollection.push(callback(values[i], i, collection))
       }
       return newCollection
     },
 
-    reduce: function(collection, callback, acc) {
+    reduce: function(collection, callback, acc) { // works, and gets around having to set a default of -2 for acc
       let i = 0
       let total = acc
 
@@ -48,28 +35,34 @@ const fi = (function() { //
       }
       return total
     },
+  //   reduce: function(collection, callback, acc = -2) { // works, but hacky
+  //     for (let i = 0; i < collection.length; i++) {
+  //       acc = callback(acc, collection[i], collection);
+  //     }
+  //     return acc;
+  //   },
+   //
+  //   reduce: function(array, callback, acc) { // also works, still hacky
+  //    acc = acc ? acc : -2
+  //    for (let i = 0; i < array.length; i++) {
+  //      acc = callback(acc, array[i])
+  //    }
+  //    return acc
+  //  },
 
     find: function(collection, predicate) {
-      let values = []
-      if (Array.isArray(collection)) {
-        values = collection.slice()
-      } else {
-        values = Object.values(collection)
-      }
+      const values = Array.isArray(collection) ? collection.slice() : Object.values(collection);
       for(let i = 0; i < values.length; i++){
         if (predicate(values[i])){
           return values[i]
         }
       }
     },
+
     filter: function(collection, predicate) {
-      let values = []
-      let newCollection = []
-      if (Array.isArray(collection)) {
-        values = collection.slice()
-      } else {
-        values = Object.values(collection)
-      }
+      const values = Array.isArray(collection) ? collection.slice() : Object.values(collection);
+      const newCollection = []
+
       for(let i = 0; i < values.length; i++){
         if (predicate(values[i])){
           newCollection.push(values[i])
@@ -79,52 +72,31 @@ const fi = (function() { //
     },
 
     size: function(collection){
-      let newCollection = 0
-      if (Array.isArray(collection)) {
-        newCollection = collection.slice()
-      } else {
-        newCollection = Object.values(collection)
-      }
+      const newCollection = Array.isArray(collection) ? collection.slice() : Object.values(collection);
       return newCollection.length
     },
 
     first: function(collection, n){
-      let newCollection = 0
-      if (Array.isArray(collection)) {
-        newCollection = collection.slice()
-      } else {
-        newCollection = Object.values(collection)
-      }
-
+      const newCollection = Array.isArray(collection) ? collection.slice() : Object.values(collection);
       if (n){
         return newCollection.slice(0, n)
+      } else {
+        return newCollection[0]
       }
-      return newCollection[0]
     },
 
     last: function(collection, n){
-      let newCollection = 0
-      if (Array.isArray(collection)) {
-        newCollection = collection.slice()
-      } else {
-        newCollection = Object.values(collection)
-      }
-
+      const newCollection = Array.isArray(collection) ? collection.slice() : Object.values(collection);
       if (n){
         return newCollection.slice(-1*n)
+      } else {
+        return newCollection[newCollection.length-1]
       }
-      return newCollection[newCollection.length-1]
     },
 
     compact: function (collection) {
-      let values = []
-      let newCollection = []
-
-      if (Array.isArray(collection)) {
-        values = collection.slice()
-      } else {
-        values = Object.values(collection)
-      }
+      const values = Array.isArray(collection) ? collection.slice() : Object.values(collection);
+      const newCollection = []
 
       for(let i = 0; i < values.length; i++){
         if (values[i]){
@@ -135,8 +107,7 @@ const fi = (function() { //
     },
 
     sortBy: function (collection, callback) {
-
-      let newSort = collection.slice()
+      const newSort = collection.slice()
       return newSort.sort(function (a, b) {
         // ranked in ascending order by the results of running each value through callback.
         // The values from the original
@@ -145,17 +116,11 @@ const fi = (function() { //
         })
     },
 
-//     unpack: function(receiver, arr) {
-//   for (let val of arr)
-//     receiver.push(val)
-// },
-
 // fi.flatten([1, [2], [3, [[4]]]]);
 // => [1, 2, 3, 4];
 //
 // fi.flatten([1, [2], [3, [[4]]]], true);
 // => [1, 2, 3, [[4]]];
-
   flatten: function(collection, shallow, newArr=[]) { // basically makings sure this arr exists and has a default initially
 
     if (shallow) {
@@ -181,19 +146,19 @@ const fi = (function() { //
     return newArr
 
     // refactored version
-    for (let currentValue of collection){
-        if (shallow && Array.isArray(currentValue)) {
-            for (let newValue of currentValue) {
-                newArr.push(newValue)
-            }
-        } else if (!shallow && Array.isArray(currentValue)) {
-            fi.flatten(currentValue, false, newArr)
-        } else {
-            newArr.push(currentValue)
-        }
-    }
-
-    return newArr
+    // for (let currentValue of collection){
+    //     if (shallow && Array.isArray(currentValue)) {
+    //         for (let newValue of currentValue) {
+    //             newArr.push(newValue)
+    //         }
+    //     } else if (!shallow && Array.isArray(currentValue)) {
+    //         fi.flatten(currentValue, false, newArr)
+    //     } else {
+    //         newArr.push(currentValue)
+    //     }
+    // }
+    //
+    // return newArr
   },
 
     uniq: function (collection, isSorted = false, callback = false) {
