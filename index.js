@@ -127,7 +127,7 @@ const fi = (function() { //
         for (let currentValue of collection){ // iterate through current val in collection
             if (Array.isArray(currentValue)){ // it it's array, go through and grb each item and push it
                 for (let newValue of currentValue) {
-                  newArr.push(newValue)
+                    newArr.push(newValue)
                 }
             } else { // if not, just push current value.
                 newArr.push(currentValue)
@@ -136,9 +136,9 @@ const fi = (function() { //
     } else {
         for (let currentValue of collection) { // iterate through current value in collction
             if (Array.isArray(currentValue)) {
-              fi.flatten(currentValue, false, newArr) // repeat process for this value - handle nestedness
+                fi.flatten(currentValue, false, newArr) // repeat process for this value - handle nestedness
             } else {
-              newArr.push(currentValue)
+                newArr.push(currentValue)
             }
         }
     }
@@ -161,25 +161,50 @@ const fi = (function() { //
     // return newArr
   },
 
-    uniq: function (collection, isSorted = false, callback = false) {
-      // collection = collection.sortBy(callback)
-      let newCollection = []
-      for (let i = 0; i < collection.length; i++) {
-        let currentValue = collection[i]
-        // let value = currentValue
+  uniq: function(collection, sorted, callback) {
+   const uniqueVals = []
+   const uniqueCallbackVals = []
 
-        if (!newCollection.includes(currentValue)){
-          newCollection.push(currentValue)
-        } else {
-          collection.splice(i, 1)
-        }
+   for (const value in collection) {
+       if (callback) {
+           if (!uniqueCallbackVals.includes(callback(collection[value]))) {
+               uniqueCallbackVals.push(callback(collection[value]))
+               uniqueVals.push(collection[value])
+           }
+       } else {
+           if (!uniqueVals.includes(collection[value])) {
+               uniqueVals.push(collection[value])
+           }
+       }
+   }
+   return uniqueVals
+  },
+
+  keys: function(collection) {
+    const keys = []
+    for (const key in collection) {
+      keys.push(key)
+    }
+    return keys
+  },
+
+  values: function(collection) {
+    const values = []
+    for (const key in collection) {
+      values.push(collection[key])
+    }
+    return values
+  },
+
+  functions: function(object) {
+    const functionNames = []
+    for (const property in object) {
+      if (typeof object[property] == 'function') {
+        functionNames.push(property)
       }
-      return collection
-    },
-
-    functions: function(array, callback) {
-
-    },
+    }
+    return functionNames.sort()
+  },
 
 
   }
